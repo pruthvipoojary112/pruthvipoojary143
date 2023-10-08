@@ -1,11 +1,11 @@
 /* Connections
-Relay. D3
-Btn. D7
+Relay. D3=IN
+ D7=PUSH
 Soil. A0
 PIR. D5
 SDA. D2
 SCL. D1
-Temp. D4
+Temp. D4=SIG
 */
 //Include the library files
 #define BLYNK_TEMPLATE_ID "TMPL3rguS-NjR"
