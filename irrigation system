@@ -1,4 +1,13 @@
-/Include the library files
+/* Connections
+Relay. D3
+Btn. D7
+Soil. A0
+PIR. D5
+SDA. D2
+SCL. D1
+Temp. D4
+*/
+//Include the library files
 #define BLYNK_TEMPLATE_ID "TMPL3rguS-NjR"
 #define BLYNK_TEMPLATE_NAME "Smart plant"
 #include <LiquidCrystal_I2C.h>
