@@ -1,0 +1,88 @@
+#define BLYNK_TEMPLATE_ID "TMPL3tCvAAyYG"
+#define BLYNK_TEMPLATE_NAME "bbb"
+#define BLYNK_AUTH_TOKEN "w9MNzD7PjG6ODCCqBOfaBEgninw3uJSk"
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+char auth[] = "w9MNzD7PjG6ODCCqBOfaBEgninw3uJSk";
+char ssid[] = "DON";
+char pass[] = "00001111";
+
+int fanPin = D1;
+const int ledPin = D3;
+const int ultrasonicTrigPin = D4;
+const int ultrasonicEchoPin = D5;
+const int potPin = A0;
+
+BlynkTimer timer;
+
+void setup()
+{
+  Serial.begin(9600);
+
+  Serial.println("Connecting to WiFi...");
+
+
+  // Initialize the fan pin as an output
+  pinMode(fanPin, OUTPUT);
+  Serial.println("Setup complete. Ready to control fan speed.");
+
+  pinMode(ledPin, OUTPUT);
+  pinMode(ultrasonicTrigPin, OUTPUT);
+  pinMode(ultrasonicEchoPin, INPUT);
+  pinMode(fanPin, OUTPUT);
+
+  Blynk.begin(auth, ssid, pass);
+  timer.setInterval(1000L, sendUltrasonicData);
+}
+
+void loop()
+{
+  Blynk.run();
+  // Potentiometer control
+  int potValue = analogRead(potPin);
+  int mappedPotValue = map(potValue, 0, 1023, 0, 255);
+  Blynk.virtualWrite(V5, potValue);
+  timer.run();
+}
+
+BLYNK_WRITE(V1)
+{
+  int buttonState = param.asInt();
+  digitalWrite(ledPin, buttonState);
+}
+
+
+void sendUltrasonicData()
+{
+  long duration, distance;
+  digitalWrite(ultrasonicTrigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(ultrasonicTrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ultrasonicTrigPin, LOW);
+  duration = pulseIn(ultrasonicEchoPin, HIGH);
+  distance = (duration * 0.0343) / 2;
+  Blynk.virtualWrite(V3, distance);
+}
+
+
+
+
+BLYNK_WRITE(V6)
+{
+  // Get the slider value from Blynk
+  int fanSpeed = param.asInt();
+
+  // Map the slider value (0-255) to PWM range (0-1023)
+  int pwmValue = map(fanSpeed, 0, 255, 0, 1023);
+
+  // Update the fan speed using PWM
+  analogWrite(fanPin, pwmValue);
+
+  // Display information in Serial Monitor
+  Serial.print("Slider Value: ");
+  Serial.println(fanSpeed);
+  Serial.print("PWM Value: ");
+  Serial.println(pwmValue);
+}
