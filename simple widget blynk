@@ -86,3 +86,22 @@ BLYNK_WRITE(V6)
   Serial.print("PWM Value: ");
   Serial.println(pwmValue);
 }
+
+
+
+
+
+
+
+
+For led control : switch,led (vitual pin v1)
+2. For pot : gauge (virtual pin v5, value 0 to 100)
+3. For ultrasonic sensor: label (virtual pin v3, string)
+4. For fan : slider (virtual pin v6, value 0 to 225)
+
+
+
+
+
+
+
