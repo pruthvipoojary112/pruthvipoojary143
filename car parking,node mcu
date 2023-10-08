@@ -1,3 +1,8 @@
+//A,D13=SE,OUT
+A,D3=SE,OUT
+A,D11=IR,OUT
+A,D12=IR,OUT
+A.D4=IR,OUT//
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL3qeMqT7Kv"
 #define BLYNK_TEMPLATE_NAME "carparking"
