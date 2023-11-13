@@ -1,40 +1,53 @@
-#define BLYNK_TEMPLATE_ID "TMPL3tCvAAyYG"
-#define BLYNK_TEMPLATE_NAME "bbb"
-#define BLYNK_AUTH_TOKEN "w9MNzD7PjG6ODCCqBOfaBEgninw3uJSk"
+#define BLYNK_TEMPLATE_ID "TMPL3Xbb1AnsQ"
+#define BLYNK_TEMPLATE_NAME "IOT"
+#define BLYNK_AUTH_TOKEN "ysuaEFfXwRCLTbhMeh86D8U_LS030Z5k"
+
+
+#define BLYNK_PRINT Serial
+
+
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 
-char auth[] = "w9MNzD7PjG6ODCCqBOfaBEgninw3uJSk";
-char ssid[] = "DON";
-char pass[] = "00001111";
 
-int fanPin = D1;
-const int ledPin = D3;
+char auth[] = "ysuaEFfXwRCLTbhMeh86D8U_LS030Z5k";
+char ssid[] = "XXX";
+char pass[] = "0000X1111";
+
+
+const int dcMotor = D1;
+int slider;
+const int inPut = D0;
+int mappedValue = 0;
+int relayPin = D2;
 const int ultrasonicTrigPin = D4;
 const int ultrasonicEchoPin = D5;
 const int potPin = A0;
 
+
 BlynkTimer timer;
+
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
+
 
   Serial.println("Connecting to WiFi...");
+ Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+ pinMode(relayPin, OUTPUT);
+  pinMode(dcMotor, OUTPUT);
+  pinMode(inPut, OUTPUT);
+  digitalWrite(inPut, HIGH);
 
 
-  // Initialize the fan pin as an output
-  pinMode(fanPin, OUTPUT);
-  Serial.println("Setup complete. Ready to control fan speed.");
-
-  pinMode(ledPin, OUTPUT);
   pinMode(ultrasonicTrigPin, OUTPUT);
   pinMode(ultrasonicEchoPin, INPUT);
-  pinMode(fanPin, OUTPUT);
 
-  Blynk.begin(auth, ssid, pass);
+
   timer.setInterval(1000L, sendUltrasonicData);
 }
+
 
 void loop()
 {
@@ -46,10 +59,13 @@ void loop()
   timer.run();
 }
 
-BLYNK_WRITE(V1)
-{
-  int buttonState = param.asInt();
-  digitalWrite(ledPin, buttonState);
+
+BLYNK_WRITE(V0) {
+  int relayState = param.asInt(); // Get value from Blynk app (0 or 1)
+
+
+  // Set the relay state
+  digitalWrite(relayPin, relayState);
 }
 
 
@@ -65,43 +81,16 @@ void sendUltrasonicData()
   distance = (duration * 0.0343) / 2;
   Blynk.virtualWrite(V3, distance);
 }
+BLYNK_WRITE(V6) {
+  slider = param.asInt();
+  mappedValue = map(slider, 0, 1023, 0, 255);
+  // generate PWM signal
+  analogWrite(dcMotor, mappedValue);
 
 
-
-
-BLYNK_WRITE(V6)
-{
-  // Get the slider value from Blynk
-  int fanSpeed = param.asInt();
-
-  // Map the slider value (0-255) to PWM range (0-1023)
-  int pwmValue = map(fanSpeed, 0, 255, 0, 1023);
-
-  // Update the fan speed using PWM
-  analogWrite(fanPin, pwmValue);
-
-  // Display information in Serial Monitor
+  // Print information to Serial Monitor
   Serial.print("Slider Value: ");
-  Serial.println(fanSpeed);
-  Serial.print("PWM Value: ");
-  Serial.println(pwmValue);
+  Serial.print(slider);
+  Serial.print(" | Mapped Value: ");
+  Serial.println(mappedValue);
 }
-
-
-
-
-
-
-
-
-For led control : switch,led (vitual pin v1)
-2. For pot : gauge (virtual pin v5, value 0 to 100)
-3. For ultrasonic sensor: label (virtual pin v3, string)
-4. For fan : slider (virtual pin v6, value 0 to 225)
-
-
-
-
-
-
-
