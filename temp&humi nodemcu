@@ -1,0 +1,90 @@
+#include <DHT.h>
+#include <ESP8266WiFi.h>
+
+String apiKey = "EXYKXKK7ZZMRR2S8"; // Enter your Write API key from ThingSpeak
+const char *ssid = "xxxxxxxx"; // replace with your WiFi SSID and WPA2 key
+const char *pass = "xxxxx";
+const char *server = "api.thingspeak.com";
+
+#define DHTPIN 2 // GPIO2 (NodeMCU D4) is where the DHT11 is connected
+#define RELAY_PIN 5 // GPIO5 (NodeMCU D1) is where the relay is connected (adjust as needed)
+
+DHT dht(DHTPIN, DHT11);
+WiFiClient client;
+
+void setup()
+{
+  Serial.begin(115200);
+  delay(10);
+  dht.begin();
+  Serial.println("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, pass);
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+  pinMode(RELAY_PIN, OUTPUT); // Set the relay pin as an output
+  digitalWrite(RELAY_PIN, LOW); // Initialize relay to be off
+}
+
+void loop()
+{
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
+  if (isnan(h) || isnan(t))
+  {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  if (client.connect(server, 80)) // "184.106.153.149" or api.thingspeak.com
+  {
+    String postStr = apiKey;
+    postStr += "&field1=";
+    postStr += String(t);
+    postStr += "&field2=";
+    postStr += String(h);
+    postStr += "\r\n\r\n";
+
+    client.print("POST /update HTTP/1.1\n");
+    client.print("Host: api.thingspeak.com\n");
+    client.print("Connection: close\n");
+    client.print("X-THINGSPEAKAPIKEY: " + apiKey + "\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\n");
+    client.print("Content-Length: ");
+    client.print(postStr.length());
+    client.print("\n\n");
+    client.print(postStr);
+
+    Serial.print("Temperature: ");
+    Serial.print(t);
+    Serial.print(" degrees Celsius, Humidity: ");
+    Serial.print(h);
+    Serial.println("%. Send to ThingSpeak.");
+
+    // Check temperature and control the relay
+    if (t > 30.0) // Adjust the temperature threshold as needed
+    {
+      digitalWrite(RELAY_PIN, HIGH); // Turn on the relay
+      Serial.println("Relay ON");
+    }
+    else
+    {
+      digitalWrite(RELAY_PIN, LOW); // Turn off the relay
+      Serial.println("Relay OFF");
+    }
+  }
+  client.stop();
+
+  Serial.println("Waiting...");
+
+  // ThingSpeak needs a minimum 15 sec delay between updates
+  delay(500); // Increase the delay to your preferred interval
+}
