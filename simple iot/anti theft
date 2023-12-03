@@ -1,6 +1,6 @@
-#define BLYNK_TEMPLATE_ID "TMPL3-Fk8as2I"
-#define BLYNK_TEMPLATE_NAME "PIR SENSOR USING NODEMCU"
-#define BLYNK_AUTH_TOKEN "9eaNzrU2YbKQdACMPHgdOmGkFPJW4Hdh"
+#define BLYNK_TEMPLATE_ID "TMPL3V0BW7fzb"
+#define BLYNK_TEMPLATE_NAME "ANTI THEFT"
+#define BLYNK_AUTH_TOKEN "KO8Wk3hDIMMwgzCoNWCQE8qR1yLJ261_"
 #define BLYNK_PRINT Serial
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
@@ -12,22 +12,34 @@ char ssid[] = "Beast07";  // type your wifi name
 char pass[] = "78847884";  // type your wifi password
  
 #define PIR_SENSOR  4
-const int buzzerPin = D7; 
-const int ledPin = D5;  
-
-
+#define BUZZER1     2
+#define led1        14
 BlynkTimer timer;
 //int flag=0;
 void notifyOnTheft()
 {
+  digitalRead(D5);
   int isTheftAlert = digitalRead(PIR_SENSOR);
   Serial.println(isTheftAlert);
   if (isTheftAlert==1) {
+    
+    
     Serial.println("Theft Alert in Home");
+  
+//    flag=1;
+    
     // Blynk.email("shameer50@gmail.com", "Alert", "Theft Alert in Home");
     //Blynk.notify("Alert : Theft Alert in Home");
     Blynk.logEvent("theft_alert","Theft Alert in Home");
-//    flag=1;
+    digitalWrite(led1, HIGH);
+    digitalWrite(BUZZER1, HIGH);
+
+
+    delay(2000);
+    digitalWrite(led1, LOW);
+    digitalWrite(BUZZER1, LOW);
+    delay(2000);
+    
   }
   else if (isTheftAlert==0)
   {
@@ -37,12 +49,8 @@ void notifyOnTheft()
 
 void setup(){
   pinMode(PIR_SENSOR, INPUT);
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(buzzerPin, LOW);
-  digitalWrite(ledPin, LOW);
-
-
+  pinMode(led1,OUTPUT);
+  pinMode(BUZZER1,OUTPUT);
    Serial.begin(115200);
   Blynk.begin(auth, ssid, pass);
   //dht.begin();
@@ -50,19 +58,7 @@ void setup(){
 }
 
 void loop(){
-
   Blynk.run();
   timer.run();
-digitalWrite(buzzerPin, HIGH);
-    digitalWrite(ledPin, HIGH);
-    delay(2000); // Buzzer and LED on for 2 seconds
-    digitalWrite(buzzerPin, LOW);
-    digitalWrite(ledPin, LOW);
-
-
 }
-
-
-
-	
 
